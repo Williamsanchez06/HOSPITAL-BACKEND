@@ -2,16 +2,33 @@ const { response } = require('express');
 const bcrypt = require('bcrypt');
 
 const Usuario = require('../models/usuario.model');
+const { db } = require('../database/config');
 
 const getUsuarios = async ( req , res ) => {
 
-    const usuarios = await Usuario.findAll();
+    const limit = Number(req.query.limit) || 0;
+
+    // const usuarios = await db.models.User.findAll({
+    //     limit : desde,
+    // });
+
+    // const total = await db.models.User.count();
+    
+    const [ usuarios, total ] = await Promise.all([
+        db.models.User
+                    .findAll({
+                        limit,
+                        // offset : 5
+                    }),
+        db.models.User.count()
+    ])
 
     return res.json({
         ok : true,
         msg : 'Get Users',
         usuarios,
-        id_usuario : req.id_usuario
+        id_usuario : req.id_usuario,
+        total
     })
 
 }
@@ -22,7 +39,7 @@ const crearUsuario = async ( req , res = response ) => {
 
    try {
 
-    const emailUserDB = await Usuario.findOne( { where : { email } } ); 
+    const emailUserDB = await db.models.User.findOne( { where : { email } } ); 
     
     if ( emailUserDB ) {
         return res.status( 400 ).json({
@@ -36,7 +53,7 @@ const crearUsuario = async ( req , res = response ) => {
     const hash = bcrypt.hashSync( password , salt );
 
     //Crear Usuario
-    const usuario = await Usuario.create({
+    const usuario = await db.models.User.create({
         nombre,
         email,
         password : hash
@@ -69,7 +86,7 @@ const actualizarUsuario = async ( req , res = response ) => {
 
     try {
 
-        const usuarioDb = await Usuario.findByPk( id );
+        const usuarioDb = await db.models.User.findByPk( id );
 
         if ( !usuarioDb ) {
             return res.status( 404 ).json({
@@ -85,7 +102,7 @@ const actualizarUsuario = async ( req , res = response ) => {
 
         if ( usuarioDb.email !== email ) {
 
-            const existeEmail = await Usuario.findOne( { where : { email } } ); 
+            const existeEmail = await db.models.User.findOne( { where : { email } } ); 
             if( existeEmail ) {
                 return res.status( 400 ).json({
                     ok : false,
@@ -122,7 +139,7 @@ const deleteUsuario = async (req, res = response) => {
 
     try {
         
-        const usuarioDb = await Usuario.findByPk( id );
+        const usuarioDb = await db.models.User.findByPk( id );
 
         if( !usuarioDb ) {
             return res.status( 404 ).json({
@@ -136,7 +153,7 @@ const deleteUsuario = async (req, res = response) => {
         return res.status( 200 ).json({
             ok: true,
             msg: 'Usuario ELiminado',
-            userEliminado
+            usuarioDb
         })
 
     } catch (error) {

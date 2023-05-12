@@ -1,7 +1,9 @@
 const Sequelize  = require("sequelize");
 require("dotenv").config(); // Se importa para utlizar las variables de entorno
 
-const db = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+const setupModels = require("../models");
+
+const db = new Sequelize( process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
   dialect: "mssql",
   host: process.env.HOST_SQL,
   port: process.env.PORT_SQL,
@@ -14,7 +16,6 @@ const db = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.D
         min:0,
         acquire: 30000,
         idle: 10000,
-
      },
 
 });
@@ -30,6 +31,8 @@ const dbConnection = async () => {
   }
 
 };
+
+setupModels( db );
 
 module.exports = {
   dbConnection,

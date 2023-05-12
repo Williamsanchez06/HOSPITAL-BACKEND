@@ -1,7 +1,8 @@
-const  { DataTypes }  = require("sequelize");
-const { db } = require("../database/config");
+const  { DataTypes, Model }  = require("sequelize");
 
-const UsuarioSchema = db.define('usuarios',{
+const USER_TABLE = 'usuarios';
+
+const UsuarioSchema = {
     id_usuario: {
         allowNull: false,
         type: DataTypes.INTEGER,
@@ -36,6 +37,25 @@ const UsuarioSchema = db.define('usuarios',{
         type :  DataTypes.BOOLEAN,
         defaultValue: false
     },
-})
+    
+}
 
-module.exports = UsuarioSchema;
+class User extends Model {
+
+    static associate( models ){
+      this.hasMany( models.Hospital, { as : 'hospital', foreignKey : 'usuario' } ),
+      this.hasMany( models.Medico, { as : 'medico', foreignKey : 'usuario' } )
+    }
+
+    static config( db ) {
+        return {
+          sequelize : db,
+          tableName : USER_TABLE,
+          modelName : 'User',
+          TimeRanges : false
+        }
+    }
+  
+}
+
+module.exports = { UsuarioSchema , User, USER_TABLE };
