@@ -17,14 +17,19 @@ router.post('/',
     [
         validarJWT,
         check('nombre', 'El nombre del Medico es Obligatorio').not().isEmpty(),
-        check('hospital', 'El id del hospital es Obligatorio').not().isEmpty().not().isNumeric(),
+        check('hospital', 'El id del hospital es Obligatorio').not().isEmpty().isNumeric(),
         validarCampos,
-    ], crearMedico );
+    ], 
+crearMedico );
 
 router.put('/:id',
     [
+        validarJWT,
+        check('nombre', 'El nombre del Medico es Obligatorio').not().isEmpty(),
+        check('hospital', 'El id del hospital es Obligatorio').not().isEmpty().isNumeric(),
+        validarCampos
     ],
- actualizarMedico )
+ actualizarMedico );
 
 router.delete('/:id', validarJWT, eliminarMedico );
 

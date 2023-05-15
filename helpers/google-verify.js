@@ -11,8 +11,6 @@ async function googleVerify( token ) {
   });
 
   const payload = ticket.getPayload();
-  
-  console.log(payload);
 
   return payload;
 
