@@ -1,8 +1,9 @@
 const { response } = require("express");
 const bcrypt = require("bcrypt");
 
-const Usuario = require("../models/usuario.model");
+const { db } = require("../database/config");
 const { generarJWT } = require("../helpers/jwt.helpers");
+const { googleVerify } = require("../helpers/google-verify");
 
 const login = async ( req, res = response ) => {
 
@@ -10,7 +11,7 @@ const login = async ( req, res = response ) => {
 
     try {
         
-        const usuarioDB = await Usuario.findOne( { where : { email } } );
+        const usuarioDB = await db.models.User.findOne( { where : { email } } );
 
         //Verificar Email
         if( !usuarioDB ) {
@@ -49,6 +50,57 @@ const login = async ( req, res = response ) => {
 
 }
 
+const googleSignIn = async ( req, res = response ) => {
+    
+    try {
+
+       const { email, name, picture } = await googleVerify( req.body.token );
+    
+       const usuarioDB = await db.models.User.findOne( { where : { email } } );
+        
+       let usuario;
+
+       if ( !usuarioDB ) {
+
+            usuario = await db.models.User.create({
+                nombre : name,
+                email,
+                password : "@@",
+                imagen : picture,
+                google : true
+            })
+
+       } else {
+
+            usuario = usuarioDB;
+
+            await usuarioDB.update({
+                google : true
+            });
+            
+       }
+
+       const token = generarJWT( usuario.id_usuario, usuario.nombre );
+
+       return res.status( 200 ).json({
+            ok: true,
+            email,
+            name,
+            picture,
+            token
+       })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg : 'Token de google no es correcto'
+        })
+    }
+
+}
+
 module.exports = {
-    login
+    login,
+    googleSignIn
 }

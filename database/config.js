@@ -17,7 +17,6 @@ const db = new Sequelize( process.env.DB_NAME, process.env.DB_USER, process.env.
         acquire: 30000,
         idle: 10000,
      },
-
 });
 
 const dbConnection = async () => {
